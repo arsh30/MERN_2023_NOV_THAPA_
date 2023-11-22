@@ -1,0 +1,152 @@
+In prev lec, we already seperated the routes in seperate file, 
+but udr hi request and response dono ko handle kro, toh it is also 
+not good, so jo router wali file hai usko bhi clean bnayege
+with the help of controllers 
+
+Controllers is like mini app, jidr hum sari functionality logic implement krege / actions 
+either it is login, signup, sara logic controllers me aayega
+
+DEFINTION -> So overall controllers are typically used to process incoming requests, interact with models (data sources). 
+and send response back to client, They help organize your application by seperating concerns
+and follows the MVC design pattern 
+
+-------------------------- PREV CODE BEFOR CONTROLLERS -----------------------------------------
+
+1. Server.js -> 
+const express = require("express"); 
+const app = express();
+
+const router = require("./router/auth-router"); 
+
+// Mount the router, to use the router in your main express app, you can mount it at a specific url prefix
+app.use("/api/auth", router); // use - it is middleware, now the route is: localhost:5000/api/auth/
+
+// 1. Creating our 1st Route
+// app.get("/", (req, res) => {
+//   res.status(200).send("welcome to mern project");
+// });
+
+// 2. Listen the server, so that, jo humne route bnaya hai, vo log access kar paye, so uske liye server ko start krna pdhega
+// means agr iss url par koi request to dekh lena
+
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running at port: ${PORT}`);
+});
+
+
+2. auth-router.js -> To make seperate file, taki jo routes hum server me bna rhe the, ab usko seperate file me bnaye 
+using Express.Router, taki hmara code clean rahe 
+
+// EXAMPLE OF THE ABOVE 2 POINTS: BELOW:
+
+const express = require("express");
+const router = express.Router(); // means in 2nd point, route bnane ke liye server ki sari configuration nahi krni hogi, jo route ko define krege
+//  like we did in server.js file, udr app.get kr, rahe the, so idr express.Router() class ka use krege to create Routes
+
+// NEW CODE, WE ARE USING ROUTER, TO CREATE NEW ROUTES
+// router.get("/", (req, res) => {
+//   res.status(200).send("welcome to mern project auth-router");
+// });
+
+// or - Another way to use router.route.get -> Preffered way to use because we can do chaining as well agr post ki request bnani hoye
+
+router.route("/").get((req, res) => {
+  res.status(200).send("welcome to mern project auth-router");
+});
+
+router.route("/register").get((req, res) => {
+  res.status(200).send("Welcome to register page");
+});
+
+module.exports = router;
+
+
+------------------------------------ NEW THIS LECTURE - CONTROLLERS ----------------------
+
+1. create folder, controllers, and make a new file auth-controller.js
+It is like, use reducer hook, dispatch there, [means kaam ko assign krna ki kya krna hai]
+and action [jo kam milta hai, vo kaam action me perform krta hai]
+
+jo bhi get method ke baad likha hoga, ie action 
+
+
+1. Server.js -> 
+
+const express = require("express"); 
+const app = express();
+
+const router = require("./router/auth-router"); 
+
+app.use("/api/auth", router); // use - it is middleware, now the route is: localhost:5000/api/auth/
+
+// 1. Creating our 1st Route
+// app.get("/", (req, res) => {
+//   res.status(200).send("welcome to mern project");
+// });
+
+// 2. Listen the server, so that, jo humne route bnaya hai, vo log access kar paye, so uske liye server ko start krna pdhega
+// means agr iss url par koi request to dekh lena
+
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running at port: ${PORT}`);
+});
+
+
+------
+
+2. Auth-router.js 
+
+const express = require("express");
+const router = express.Router(); // means in 2nd point, route bnane ke liye server ki sari configuration nahi krni hogi, jo route ko define krege
+//  like we did in server.js file, udr app.get kr, rahe the, so idr express.Router() class ka use krege to create Routes
+
+// NEW CODE, WE ARE USING ROUTER, TO CREATE NEW ROUTES
+// router.get("/", (req, res) => {
+//   res.status(200).send("welcome to mern project auth-router");
+// });
+
+// or - Another way to use router.route.get -> Preffered way to use because we can do chaining as well agr post ki request bnani hoye
+
+const authcontrollers = require("../controllers/auth-controller");
+
+router.route("/").get(authcontrollers.home);
+
+router.route("/register").get(authcontrollers.register);
+
+module.exports = router;
+
+-----------
+
+3. Auth-controllers -> (it basically contains the logic ,async jbhi use krege tab try catch bhi use krna chaiye)
+
+/*----------------
+HOME LOGIC
+------------------ */
+
+const home = async (req, res) => {
+  // always use async , we should have to use try and catch , async ke sath use krna chaiye
+
+  try {
+    // Paste the logic, or response part
+    res.status(200).send("welcome to mern project auth-router");
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+/*---------------------------
+Register logic
+-----------------------------*/
+const register = async (req, res) => {
+  try {
+    res.status(200).send("Welcome to register page using controllers");
+  } catch (error) {
+    res.status(400).send({ msg: "page not found" });
+  }
+};
+
+module.exports = {home,register};
+
+********************************** FINISH *****************

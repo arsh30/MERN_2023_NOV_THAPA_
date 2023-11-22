@@ -1,0 +1,67 @@
+JO BHI PRIVATE KEYS HAI, PRIVATE TEXT USKO SECURE KREGE 
+
+1. so install - npm i dotenv
+2. in Mongodb atlas -> connect ->drivers -> connecting with mongodb driver 
+            -> copy the string
+            -> paste in the db.js instead of previous link: jo isme humne password put kra hai, vo server ka password hai so it should be secure 
+            so usko put krege into the dotenv, it is very usefull in development
+    
+3. create a new file -> .env, install the package dot env + vault -> isse dot env me bhi data nahi dikhayi dega ,
+ 
+-> jo bhi likhege vo sab caps me hoga, 
+
+==================================================================
+
+1. .env ->
+MONGODB_URI=mongodb+srv://arshdeep30:Arshdeep123@cluster0.ms0ehyf.mongodb.net/mern_thapa?retryWrites=true&w=majority
+
+2.  db.js ->
+
+const mongoose = require("mongoose");
+
+// const URI = "mongodb+srv://arshdeep30:Arshdeep123@cluster0.ms0ehyf.mongodb.net/"; // Jo last me likha hai, ie our clustor naem
+// THE URI, IS COMES AFTER SETTING THE INFO IN ATLAS, AND RUN COMMAND IE "MONGOSH" To get the link
+
+const URI = process.env.MONGODB_URI;
+// mongoose.connect(URI);
+
+const connectDb = async () => {
+  try {
+    await mongoose.connect(URI);
+    console.log("connection successful to DB");
+  } catch (error) {
+    console.log("Database connection is failed");
+    process.exit(0);
+  }
+};
+
+module.exports = connectDb;
+
+============================
+
+3. server.js ->
+
+require("dotenv").config(); // is line ko use krna is mandatory, taki hum dot env ko kahin bhi use krlege, sabse upr rkhege 
+const express = require("express");
+const app = express();
+
+const router = require("./router/auth-router");
+const connectDb = require("./utils/db"); // connect DB returns a promise
+
+// Middleware - express.json -> taki jo bhi body me bhjege, usko get kar ske very very important
+app.use(express.json());
+
+app.use("/api/auth", router);
+
+const PORT = 5000;
+connectDb()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running at port: ${PORT}`);
+    });
+  })
+  .catch(() => {
+    console.log("ERROR");
+  });
+
+---------------------------- FINISH ------------------------------------

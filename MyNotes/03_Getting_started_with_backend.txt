@@ -1,0 +1,48 @@
+create folder - server [isme sara backend and server ka code rhega]
+
+1. npm init -y - [taki hum jo package install kre unko maintain krke rakh paye]
+2. npm i express - [to create our server]
+3. make file inside server folder - "server.js"
+4. npm i nodemon
+
+----------------------------------CREATING OUR SERVER -----------------------------------------------------------------------
+
+const express = require("express"); // imported the express module
+
+const app = express();
+
+// 1. Creating our 1st Route
+app.get("/", (req, res) => {
+  /*
+   1st argument is route, means user ki page par request kr raha hai navigate ke liye
+   2nd argument is callback function, eg: server ki trah think kro, like user ne kisi url pr push kra, and , jo data sara aayega vo
+                                          server dega as a response, 
+
+    so means we have req, and res parameter in the callback function
+
+    */
+  res.status(200).send("welcome to mern project");
+});
+
+app.get('/register', (req,res) => { // route ie path ko define kra, same as above
+res.status(200).send('Welcome to register page')
+
+})
+
+// 2. Listen the server, so that, jo humne route bnaya hai, vo log access kar paye, so uske liye server ko start krna pdhega
+// means agr iss url par koi request to dekh lena
+
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running at port: ${PORT}`);
+});
+
+// 3. to start our server -> node server.js or npm run start, Now go to url - localhost:5000 and search , yehi wala response aayega
+
+// 4. npm i nodemon -> taki bar bar server ko restart na krna pdhe, jo humne changes krege, - THen we should the start the project - nodemon server.js 
+
+ "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1", 
+    "start" : "nodemon server.js"; // ye add krna hoga
+  },
+******************************** FINISH ****************************************

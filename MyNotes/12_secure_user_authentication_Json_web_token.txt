@@ -1,0 +1,194 @@
+What is JWT ?
+S) Json web token that defines a compact and self-contained way for securely
+transmitting information between parties as a JSON object
+
+JWT are often used for authentication and autherization in web application 
+1. Authentication -> verifying the identity of a user or client
+2. Autherization -> Determining what actions a user or client is allowed to perform 
+
+Eg1: authentication means kisi ko verify krre hai, ki vo vai banda hai ya nahi, 
+autherization means once ek bar verify krliya toh ab usko uske base par kuch access denge 
+
+Eg2: 1 hotel start kra hai usme 3 rooms hai normal,luxury, ultra luxary
+Toh sabse pehle id check krege, ki uss person ne booking ki hai ya nahi, so it is kind of authentication 
+and once humne authentication krli, uske baad autherization ki bari aayegi, 
+ki konsi konsi cheezo ka access de skte hai, agr vo normal user hai toh normal room hi denge 
+luxary and ultra luxary to room nahi denge. 
+
+=========================STRUCTURE & COMPONENTS OF JWT =====================================
+
+1. Header -> contains the metadata about the token, such as type of token and the signing algorithm being used 
+2. Payload -> contains user identity, and additional data. commonly used userId, username, and expiration time 
+3. Signature -> To verify that the sender of JWT is who it says it is and to ensure that the message wasn't change along the 
+                way , a signure is included
+                [means Aisa signature hoga, JWT me jo sirf server ko hi pta hoga]
+
+
+Means
+ENCODED FORM ME HOGA FINAL OUTPUT IE JWT, 
+JISME 3 CHEEZE HONGI, 
+
+HEADER - contains algorithm, and type 
+PAYLOAD - Any additional information that we want to add like time,
+SIGNATURE - SHA-256 CODE
+
+======================= IMPORTANT & MAKE SURE POINT ================================
+
+Json web token, are typically not stored in Database, 
+always store in the client side in the form of cookies or in the form of local storage 
+kabhi bhi server par nahi bhjna 
+
+jwt, always server issued us that we add in the frontend, in the cookies 
+
+2. make sure jo jwt hoga, vo string hi hoga
+================================= CODE ==================================
+
+1. User_Model.js -> MAIN JWT LOGIC -> 
+
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const userSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    require: true,
+  },
+  email: {
+    type: String,
+    require: true,
+  },
+  phone: {
+    type: String,
+    require: true,
+  },
+  password: {
+    type: String,
+    require: true,
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+userSchema.pre("save", async function (next) {
+  // console.log("pre method", this);
+  const user = this;
+
+  if (!user.isModified("password")) {
+    next();
+  }
+
+  // IF PASSWORD IS MODIFIED, OR NEW CREATE
+  try {
+    const saltRound = await bcrypt.genSalt(10);
+    const hash_password = await bcrypt.hash(user.password, saltRound);
+    user.password = hash_password;
+  } catch (error) {
+    next(error);
+  }
+});
+
+// JSON WEB TOKEN (IMPORTANT)
+// methods is the instance method of userSchema, iski help se kitne bhi functions
+// create kr skte hai and use kisi bhi page me access kr skte hai
+// In JWT, There are only 2 things, jwt.sign and jwt.verify,
+// so to use npm i jsonwebtoken
+
+// jwt.sign -> iit accept 2 parameter ie payload, and secret key that we put in dot env file
+userSchema.methods.generateToken = async function () {
+  try {
+    // json web token ko return kr rahe hai, taki udr catch kar paye
+    return jwt.sign(
+      {
+        userId: this._id.toString(),
+        email: this.email,
+        isAdmin: this.isAdmin,
+      },
+      process.env.JWT_SECRET_KEY,
+      {
+        expiresIn: "30d",
+      }
+    );
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// define the model or the collection name
+const User = new mongoose.model("User", userSchema);
+
+module.exports = User;
+
+
+*******************************
+
+2.AuthController.js -> 
+
+const User = require("../models/user-model");
+
+/*----------------
+HOME LOGIC
+------------------ */
+
+const home = async (req, res) => {
+  // always use async , we should have to use try and catch , async ke sath use krna chaiye
+
+  try {
+    // Paste the logic, or response part
+    res.status(200).send("welcome to mern project auth-router");
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+/*---------------------------
+Register logic
+
+1. GET REGISTRATION DATA: data ko get krege with the help of req.body (user,email,password)
+2. CHECK EMAIL EXISTANCE: check if the email is already registered in the db or not.
+3. If it is present , simply return hojao with status code
+4. HASH password -> securely hash the password.
+5. otherwise Create User -> create a new User with Hash password
+6. save to DB -> save user data to db
+7. Respond - respond with "registration successfull" or handle errors
+
+-----------------------------*/
+const register = async (req, res) => {
+  try {
+    // console.log(req.body); // To get the data, what ever is typed in the frontend, we use req, and body ke andr data aayega
+    const { username, email, password, phone } = req.body;
+
+    const userExist = await User.findOne({ email: email }); // 2. User - schema jo bnaya tha Model me import kra usme search krega, and
+
+    if (userExist) {
+      return res.status(400).json({ message: "Email already Exists" });
+    }
+
+    // HASH THE PASSWORD
+    // const saltRound = 10; // salt means kitna complex hash password dena hai, jitna jyda denge utna jyda time consuming ho
+    // const hash_password = await bcrypt.hash(password, saltRound);
+
+    const userCreated = await User.create({
+      username,
+      email,
+      password,
+      phone,
+    });
+    res
+      .status(200)
+      .json({
+        // message: userCreated, Not send the user details on frontend
+        message:"Registration Successfull",
+        token: await userCreated.generateToken(),
+        userId: userCreated._id.toString(),
+      });
+  } catch (error) {
+    res.status(500).json("Internal Server Error");
+  }
+};
+
+module.exports = { home, register };
+
+============================================ FINISH ============================

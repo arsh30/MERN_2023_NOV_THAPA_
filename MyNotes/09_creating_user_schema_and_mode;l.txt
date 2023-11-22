@@ -1,0 +1,58 @@
+USER SCHEMA AND MODEL IS VERY IMPORTANT TERM IN THIS. 
+
+chahe login ya registration ke liye form bnaege, to udr fields mention hoti hai 
+like for eg: registration agr ho raha hoga, toh we need, 
+NAME, EMAIL ,PASSWORD, PHONE num, toh backend ko btana pdhega ki user sirf ye 4 hi data 
+enter krega, and inka data type kya hoga, jab submit krke store krdega 
+tab database me kese store krna hai in sabko
+Toh ye sara userSchema -> STRUCTURE btata hai
+
+and Model ki help se CRUD kr skte hai. 
+
+---------------------------------------------------------
+
+1. Create a folder ie MODEL & make a file user-model.js 
+
+SCHEMA -> It is instance of our mongooseSchema, it Defines the structure of the documents within a collection.
+It specifies the fields , their type, and any additional constraint or validation 
+
+USER_MODEL -> It acts as a high level abstraction that interacts with the database based on the defined schema. 
+             It represent a collection and provide an interface for CRUD in that collection. 
+             Model are created from Schemas and enable you to work with mongodb data in a more structured manner in your app. 
+
+CODE ->
+
+const mongoose = require("mongoose");
+
+const userSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    require: true,
+  },
+  email: {
+    type: String,
+    require: true,
+  },
+  phone: {
+    type: String,
+    require: true,
+  },
+  password: {
+    type: String,
+    require: true,
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+// define the model or the collection name
+const User = new mongoose.Model("User", userSchema);
+// 1st argument is collectionName, jo bhi collection name, by default sabke piche "s" ajata hai
+// 2nd argument kis collection ke andr add krege, means konsa structure h
+
+module.exports = User;
+
+
+************************ FINISH **********************

@@ -1,0 +1,81 @@
+INSTALL MONGO DB -> 
+    - search on google mongodb atlas
+    - signup (with google)
+
+    MAKE SURE TO CHECK THE BELOW POINTS IN THE DB 
+    - Network access -> Add this 0.0.0.0/0 (mena mongodb instance will be reachable from all network means ALLOW ACCESS FROM ANYWHERE)  
+    - Database access -> check this, password pta hona chaiye very mandatory 
+    - database (come to direct database) 
+
+    NOTE - CHECK THE MONGO DB COURSE TO DO THIS.
+
+-------------------------------------------------------
+MONGO DB ATLAS -> FOLLOW BELOW APPROACH TO CONNECT WITH THE DB.. 
+
+1.DATABASE_ACCESS -> username - arsh_2023 ; password - 9278163880 , built-in-role:atlas-admin, rest all should be same
+2. NETWORK_ACCESS -> add ip address - make sure to check "add netwrok from anywhere"
+3. DATA_BASE -> create a deployment -> create -> free version -> aws -> region mumbai -> cluster0 (name of cluster) -> Create -> create username and password -> my local environment -> add my current ip address -> finish and close (hide wala check ko tick krdo) -> username - arshdeep30; password -> Arshdeep123
+
+MAKE SURE POINTS -> 
+1. DATA_BASE access -> idr complete data show hona chaiye 
+2. NETWORK_ACCESS -> Status jo hai update hona chaiye to "Active"
+3. OVERVIEW Tab open -> click on CONNECT ooption -> choose compass -> i have mongodb compass (option choose) -> copy the URL (PASTE THE USERNAME AND PASSWORD), AND PASTE THE STRING IN THE COMPASS
+    In terminal -> mongosh paste_URL (it will connect)
+    show dbs
+
+
+================ code ========================================
+
+1. npm i mongoose
+2. make another folder ie UTILS -> create file ie db.js 
+
+3. db.js -> 
+
+const mongoose = require("mongoose");
+
+const URI = "mongodb+srv://arshdeep30:Arshdeep123@cluster0.ms0ehyf.mongodb.net/"; // Jo last me likha hai, ie our clustor naem
+// THE URI, IS COMES AFTER SETTING THE INFO IN ATLAS, AND RUN COMMAND IE "MONGOSH" To get the link
+
+// mongoose.connect(URI);
+
+const connectDb = async () => {
+  try {
+    await mongoose.connect(URI);
+    console.log("connection successful to DB");
+  } catch (error) {
+    console.log("Database connection is failed");
+    process.exit(0);
+  }
+};
+
+module.exports = connectDb;
+
+
+===============================
+
+2. SERVER.JS (db ke baad iss file me changes krne h)
+
+const express = require("express");
+const app = express();
+
+const router = require("./router/auth-router");
+const connectDb = require("./utils/db"); // connect DB returns a promise
+
+// Middleware - express.json -> taki jo bhi body me bhjege, usko get kar ske very very important
+app.use(express.json()); // means ab apni application me json parse kr skte hai
+/*
+The above line of code add express middleware that parse incoming request bodies with JSON payloads. it is important to place this
+before any routes that need to handle JSON data in the req body, This middleware is responsible for parsing JSON data from request 
+
+*/
+
+app.use("/api/auth", router);
+
+const PORT = 5000;
+connectDb().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is running at port: ${PORT}`);
+  });
+}).catch(() => {
+  console.log("ERROR")
+});

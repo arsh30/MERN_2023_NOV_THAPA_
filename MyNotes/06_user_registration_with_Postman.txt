@@ -1,0 +1,101 @@
+POST -> Jo auth-router me .get route tha , usko change krke .post kra hai , 
+means jbhi user kuch likhega contact form ya login me toh jo bhi data hoga,  
+agr POST method, ka use krege toh vo data add hojayega DB me
+
+- If we want to add something in the Db - use POST method 
+
+- Get - To read from DB 
+- post - Inser data in DB 
+- put or patch - Update data, or insert a new Id 
+- Delete - Delete data
+
+---------------------------------------------------
+
+1. IN postman - POST API -> Headers -> add content-Type:application/json (ye set krege means hum data bhjege JSON type ka hoga)
+                         -> Body -> raw -> JSON -> pass data in json format (body me hum data pass krte hai)
+                         -> send 
+
+------------------------- CODE --------------------------
+
+1. SERVER.JS 
+
+const express = require("express");
+const app = express();
+
+const router = require("./router/auth-router");
+
+// Middleware - express.json -> taki jo bhi body me bhjege, usko get kar ske very very important
+app.use(express.json()); // means ab apni application me json parse kr skte hai
+
+/*
+The above line of code add express middleware that parse incoming request bodies with JSON payloads. it is important to place this
+before any routes that need to handle JSON data in the req body, This middleware is responsible for parsing JSON data from request 
+*/
+
+app.use("/api/auth", router); // middleware , Taki sabse pehle ye route match hojaye and router ke andr jo bhi API hai unko call kr ske 
+
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running at port: ${PORT}`);
+});
+
+--------------------------
+
+2. Auth-router.js -> 
+
+// EXAMPLE OF THE ABOVE 2 POINTS: BELOW:
+
+const express = require("express");
+const router = express.Router(); // means in 2nd point, route bnane ke liye server ki sari configuration nahi krni hogi, jo route ko define krege
+//  like we did in server.js file, udr app.get kr, rahe the, so idr express.Router() class ka use krege to create Routes
+
+// NEW CODE, WE ARE USING ROUTER, TO CREATE NEW ROUTES
+// router.get("/", (req, res) => {
+//   res.status(200).send("welcome to mern project auth-router");
+// });
+
+// or - Another way to use router.route.get -> Preffered way to use because we can do chaining as well agr post ki request bnani hoye
+
+const authcontrollers = require("../controllers/auth-controller");
+
+router.route("/").get(authcontrollers.home);
+
+router.route("/register").post(authcontrollers.register);
+
+module.exports = router;
+
+--------------------------------
+
+3. auth-controllers
+
+/*----------------
+HOME LOGIC
+------------------ */
+
+const home = async (req, res) => {
+  // always use async , we should have to use try and catch , async ke sath use krna chaiye
+
+  try {
+    // Paste the logic, or response part
+    res.status(200).send("welcome to mern project auth-router");
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+/*---------------------------
+Register logic
+-----------------------------*/
+const register = async (req, res) => {
+  try {
+    console.log(req.body); // To get the data, what ever is typed in the frontend, we use req, and body ke andr data aayega
+
+    res.status(200).json({ message: req.body });
+  } catch (error) {
+    res.status(400).json({ msg: "page not found" });
+  }
+};
+
+module.exports = { home, register };
+
+************************************** FINISH ***************

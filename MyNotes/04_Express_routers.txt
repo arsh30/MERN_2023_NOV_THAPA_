@@ -1,0 +1,102 @@
+------ EXPRESS ROUTER, CREATING AND ORGANIZING ROUTES ----------
+
+1. main moto is that, we make sure that server.js file should be clean as much as possible
+2. create a new folder - "router" 
+                            -> make a file ie "auth--router.js" - iske andr main registration, login, signup, user data get, 
+                                                                  all comes under authentication or autherization
+
+
+-------------------------------------------------------------------------------
+
+1. Auth-router.js file code -> 
+
+/*----------------------
+express.Router
+----------------------*/
+
+/*
+1. express.Router is a class to create modular, mountable route handler, A router instance is a complete
+middleware and routing system, for this reason, it is often refered to as a "mini-app"
+
+
+2. In express.js, express.Router() is a mini Express Application without all the server configurations but with the ability
+to define the routes, middleware, and even have its own set of route handlers, it allows you to modularize your routes
+and middleware to keep your code organized and maintable
+
+*/
+
+// EXAMPLE OF THE ABOVE 2 POINTS: BELOW:
+
+const express = require("express");
+const router = express.Router(); // means in 2nd point, route bnane ke liye server ki sari configuration nahi krni hogi, jo route ko define krege
+//  like we did in server.js file,
+// udr app.get kr, rahe the, so idr express.Router() class ka use krege to create Routes
+
+// OLD CODE - THAT WE COPY
+/*
+app.get("/", (req, res) => {
+  res.status(200).send("welcome to mern project");
+});
+
+app.get("/register", (req, res) => {
+  res.status(200).send("Welcome to register page");
+});
+*/
+
+// NEW CODE, WE ARE USING ROUTER, TO CREATE NEW ROUTES
+// router.get("/", (req, res) => {
+//   res.status(200).send("welcome to mern project auth-router");
+// });
+
+// or - Another way to use router.route.get -> Preffered way to use because we can do chaining as well agr post ki request bnani hoye
+
+router.route("/").get((req, res) => {
+  res.status(200).send("welcome to mern project auth-router");
+});
+
+router.route("/register").get((req, res) => {
+  res.status(200).send("Welcome to register page");
+});
+
+// 3. step 3rd - now export this file
+module.exports = router;
+
+
+
+-------------------------------------------------------------------------------
+
+2. server.js -> using the router, that we use in auth-router code -> 
+
+code ->
+
+const express = require("express"); // imported the express module
+const app = express();
+
+const router = require("./router/auth-router"); // -> jabhi express.Router, ke through routes krege to import krege iss file me taki server unko listen kr paye
+
+// Mount the router, to use the router in your main express app, you can mount it at a specific url prefix
+app.use("/api/auth", router); // use - it is middleware, now the route is: localhost:5000/api/auth/
+
+// JAB EXPRESS.ROUTER USE NAHI KRRE THE, TOH SARA CODE, SERVER ME LIKHNA PDH RAHA THA 
+
+// 1. Creating our 1st Route
+// app.get("/", (req, res) => {
+//   res.status(200).send("welcome to mern project");
+// });
+
+// app.get("/register", (req, res) => {
+//   res.status(200).send("Welcome to register page");
+// });
+
+// 2. Listen the server, so that, jo humne route bnaya hai, vo log access kar paye, so uske liye server ko start krna pdhega
+// means agr iss url par koi request to dekh lena
+
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running at port: ${PORT}`);
+});
+
+// 3. npm i nodemon -> taki bar bar server ko restart na krna pdhe, jo humne changes krege, - THen we should the
+//  start the project - nodemon server.js
+
+********************************************** FINISH ******************************
