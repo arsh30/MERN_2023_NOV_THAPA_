@@ -1,3 +1,38 @@
+COMPLETE LOGIN FUNCTIONALITY [Registration me parts me kra tha , but in login 1 hi lec me krege]
+
+
+QUICK RECAP OF REGISTRATION 
+1. Db se connection bnana pdha ie db.js file
+2. model ke through Schema define krna pdha, means jo registration hoga usme konsi konsi fields hongi frontend par 
+3. Auth-controller -> implement logic 
+            -> 1. email,pass,phone,username get kra from body 
+            -> 2. check kra if it exist , agr yes toh return with error message 
+            -> 3. agr nahi, toh pehle HASH THE PASSWORD using bcrypt inside the userSchema model using Pre method
+            -> 4. JSON WEB TOKEN ko get kra with the help of instance of userSchema using methods in USER SCHEMA 
+            -> 5. response bhjdo phir 
+
+=======================STEPS HOW CAN WE MAKE LOGIN ROUTE =====================================================================================================
+
+1. Login Route ( AUTH-ROUTER.JS ) -> (ye sbse pehle chaiye hoga)
+
+const express = require("express");
+const router = express.Router(); // means in 2nd point, route bnane ke liye server ki sari configuration nahi krni hogi, jo route ko define krege
+//  like we did in server.js file, udr app.get kr, rahe the, so idr express.Router() class ka use krege to create Routes
+
+const authcontrollers = require("../controllers/auth-controller");
+
+router.route("/").get(authcontrollers.home);
+
+router.route("/register").post(authcontrollers.register);
+router.route("/login").post(authcontrollers.login);
+
+module.exports = router;
+
+*******************************************
+
+
+2. LOGIN Logic (auth-controllers)
+
 const User = require("../models/user-model");
 const bcrypt = require("bcryptjs");
 
@@ -68,20 +103,26 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 2. check Email Valid or not 
+    // 2. check Email Valid or not [Means vo already registred kiya gya h db me ya nahi]
+    // agr email id, db me hai hi nahi  means vo kbhi registered hua hi nahi, agr kabhi registered hua hi nahi toh Login nahi krwa skte, usko bolege ki register krle pehle
+
+    // doubt (IMPORTANT CONCEPT) -> registration ke time Model create kra kyuki vo entry krega jo jo fields chaiye hongi frontend pr ki usme ye sari fields hongi
+    // but login ke liye toh koi model define hi nahi kra, same UserSchema wala model h usko use krege, kyuki once user registered hojayega toh baat hi khtm
+    // kyu bar bar login ke alag Schema bnana
     const userExist = await User.findOne({ email: email });
+    console.log("user exist", userExist);
 
     // 3. user agr exist nahi krta toh usko pehel bolege ki registered kre then login kre
     if (!userExist) {
       return res.status(400).json({ message: "Invalid Credentials" });
     }
 
-    // 4. If userExist (toh password ko compare krege), ye jo password, idr compare krre hai, direct isko userSchema me compare krege
-    // Try to clean this file
-    // const user = await bcrypt.compare(password, userExist.password);
-
-    const user = await userExist.comparePassword(password); // ye password jo abhi user ne enter kiya hai, 
+    // 4. If userExist (toh password ko compare krege)
+    const user = await bcrypt.compare(password, userExist.password); // PASSWORD JO ALREADY STORE H, AND hash_password ko compare kra
+    console.log("user", user);
+    
     if (user) {
+      console.log("INSIDE IF");
       res.status(200).json({
         message: "Login Successfull",
         token: await userExist.generateToken(), // mandatory because we need this, make sure idr userExist agr krta hai tabhi Token generate krwana thaa, taki hum client ko send kr ske , authentication and autherization krwa paye
@@ -98,3 +139,5 @@ const login = async (req, res) => {
 };
 
 module.exports = { home, register, login };
+
+============================= FINISH ==================
